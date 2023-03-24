@@ -149,6 +149,14 @@ WHERE client_table.branch_id = (
     LIMIT 1
 );
 
+SELECT * FROM employee WHERE (emp_id % 2 = 0);
+SELECT * FROM employee WHERE sex = 'm';
+SELECT if(sex = 'm', 'Man', 'Female') FROM employee;
+SELECT 'MAN' FROM (
+	SELECT * FROM employee WHERE sex = 'm'
+)
+;
+
 
 
 
