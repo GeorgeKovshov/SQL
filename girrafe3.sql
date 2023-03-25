@@ -154,8 +154,82 @@ SELECT * FROM employee WHERE sex = 'm';
 SELECT if(sex = 'm', 'Man', 'Female') FROM employee;
 SELECT 'MAN' FROM (
 	SELECT * FROM employee WHERE sex = 'm'
+);
+
+SELECT CONCAT(first_name, '(', LEFT(salary, 1), ')') as result
+FROM employee
+UNION
+(SELECT CONCAT('There are a total of ', COUNT(sex), if(sex='m', ' men.', ' women.')) as result
+FROM employee
+GROUP BY sex
 )
 ;
+
+(SELECT CONCAT(t0.first_name, '(', LEFT(t0.salary, 1), ')') as result
+FROM (
+	SELECT DISTINCT first_name, salary 
+    FROM employee
+    order by first_name
+    ) as t0
+
+)
+UNION
+(SELECT CONCAT('There are a total of ', t1.count_sex, if(t1.sex='m', ' men.', ' women.')) 
+FROM (
+	SELECT employee.sex, count(employee.sex) as count_sex from employee group by employee.sex order by count_sex
+	) as t1
+)
+;
+
+SELECT DISTINCT sex 
+FROM employee;
+
+
+CREATE TABLE Meeting
+(
+    ID INT,
+    Meeting_id INT,
+    field_key VARCHAR(100),
+    field_value VARCHAR(100)
+);
+
+INSERT INTO Meeting(ID,Meeting_id,field_key,field_value)
+VALUES (1, 1,'first_name' , 'Alec');
+INSERT INTO Meeting(ID,Meeting_id,field_key,field_value)
+VALUES (2, 1,'last_name' , 'Jones');
+INSERT INTO Meeting(ID,Meeting_id,field_key,field_value)
+VALUES (3, 1,'occupation' , 'engineer');
+INSERT INTO Meeting(ID,Meeting_id,field_key,field_value)
+VALUES (4,2,'first_name' , 'John');
+INSERT INTO Meeting(ID,Meeting_id,field_key,field_value)
+VALUES (5,2,'last_name' , 'Doe');
+INSERT INTO Meeting(ID,Meeting_id,field_key,field_value)
+VALUES (6,2,'occupation' , 'engineer');
+
+
+-- dynamycally generate pivoting without knowing column names
+
+SET @sql = NULL;
+SELECT
+  GROUP_CONCAT(DISTINCT
+    CONCAT(
+      'max(case when field_key = ''',
+      field_key,
+      ''' then field_value end) ',
+      field_key
+    )
+  ) INTO @sql
+FROM
+  Meeting;
+SET @sql = CONCAT('SELECT Meeting_id, ', @sql, ' 
+                  FROM Meeting 
+                   GROUP BY Meeting_id');
+
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+
 
 
 

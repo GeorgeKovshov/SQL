@@ -46,4 +46,38 @@ FROM TRIANGLES;
 
 SELECT if(sex = 'm', 'Man', 'Female') FROM employee;
 
+SELECT Name FROM STUDENTS WHERE Marks>75
+ORDER BY RIGHT(Name, 3), ID ASC;
+
+SELECT NAME FROM EMPLOYEE WHERE SALARY>2000 AND MONTHS<10;
+
+
+(SELECT CONCAT(t0.Name, '(', LEFT(t0.Occupation, 1), ')') as nam_prof
+FROM (
+    SELECT DISTINCT Name, Occupation
+    FROM OCCUPATIONS
+    ORDER BY Name
+    ) as t0
+)
+UNION
+(SELECT CONCAT('There are a total of ', t1.count_occup, ' ', LOWER(t1.Occupation), 's.')
+FROM (
+    SELECT Occupation, COUNT(Occupation) as count_occup
+    FROM OCCUPATIONS
+    GROUP BY Occupation
+    ORDER BY count_occup ASC, Occupation ASC
+    ) AS t1
+);
+
+SELECT CONCAT(Name,'(', LEFT(Occupation, 1), ')') 
+FROM (
+SELECT Name, Occupation, row_number() OVER (order by Name ASC) as RowNum  FROM OCCUPATIONS
+) as X 
+UNION ALL
+SELECT CONCAT('There are a total of ', cou, ' ', Lower(Occupation), 's.')
+FROM (
+SELECT Occupation, COUNT(Occupation) as cou, row_number() over(order by COUNT(Occupation), Occupation) 
+FROM OCCUPATIONS GROUP BY Occupation
+) as Y;
+
 
