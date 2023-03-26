@@ -181,8 +181,92 @@ FROM (
 )
 ;
 
+SELECT * FROM employee;
 SELECT DISTINCT sex 
 FROM employee;
+
+
+SELECT Men, Women from
+(	SELECT 
+	IF(sex = 'M', first_name, NULL) as Men,
+    IF(sex = 'F', first_name, NULL) as Women
+	FROM employee
+) as t0
+
+ORDER BY Men, Women;
+
+
+SELECT t1.Men, t0.Women
+from(Select
+	first_name as Men,
+    row_number() OVER (order by first_name ASC) as RowNum
+FROM employee
+WHERE sex = 'F') as t1
+left join(SELECT 
+	first_name as Women,
+    row_number() OVER (order by first_name ASC) as RowNum
+FROM employee
+WHERE sex = 'M') as t0
+on t1.RowNum = t0.RowNum
+
+UNION
+
+SELECT t1.Men, t0.Women
+from(Select
+	first_name as Men,
+    row_number() OVER (order by first_name ASC) as RowNum
+FROM employee
+WHERE sex = 'F') as t1
+RIGHT join(SELECT 
+	first_name as Women,
+    row_number() OVER (order by first_name ASC) as RowNum
+FROM employee
+WHERE sex = 'M') as t0
+on t1.RowNum = t0.RowNum;
+
+
+SELECT Men, Women, salary
+FROM(
+	SELECT t1.Men, t0.Women,
+    row_number() OVER () as RowNum
+	from(Select
+		first_name as Men,
+		row_number() OVER (order by first_name ASC) as RowNum
+	FROM employee
+	WHERE sex = 'M') as t1
+	left join(SELECT 
+		first_name as Women,
+		row_number() OVER (order by first_name ASC) as RowNum
+	FROM employee
+	WHERE sex = 'F') as t0
+	on t1.RowNum = t0.RowNum
+) as b1
+JOIN(
+	SELECT salary,
+    row_number() OVER (order by salary ASC) as RowNum
+    from employee
+    WHERE salary > 1000
+) as b2
+ON b1.RowNum = b2.RowNum;
+
+
+
+SELECT t1.Men, t0.Women
+from(Select
+	first_name as Men,
+    row_number() OVER (order by first_name ASC) as RowNum
+FROM employee
+WHERE sex = 'M') as t1
+left join(SELECT 
+	first_name as Women,
+    row_number() OVER (order by first_name ASC) as RowNum
+FROM employee
+WHERE sex = 'F') as t0
+on t1.RowNum = t0.RowNum;
+    
+
+
+
 
 
 CREATE TABLE Meeting
@@ -206,6 +290,15 @@ VALUES (5,2,'last_name' , 'Doe');
 INSERT INTO Meeting(ID,Meeting_id,field_key,field_value)
 VALUES (6,2,'occupation' , 'engineer');
 
+
+
+select meeting_Id,
+         max(case when (field_key='first_name') then field_value else NULL end) as 'first_name',
+         max(case when (field_key='last_name') then field_value else NULL end) as 'last_name',
+         max(case when (field_key='occupation') then field_value else NULL end) as 'occupation'
+         from meeting
+         group by meeting_Id
+         order by meeting_Id;
 
 -- dynamycally generate pivoting without knowing column names
 

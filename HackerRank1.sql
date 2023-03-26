@@ -81,3 +81,58 @@ FROM OCCUPATIONS GROUP BY Occupation
 ) as Y;
 
 
+
+
+
+SELECT b1.Doctor, b1.Professor, b2.Singer, b2.Actor
+from
+    (SELECT t0.Doctor as Doctor, t1.Professor as Professor,
+     row_number() OVER () as RowNum
+     FROM
+        (   Select Name as Doctor,
+            row_number() OVER (order by Name ASC) as RowNum
+            FROM OCCUPATIONS
+            WHERE Occupation = 'Doctor') as t0
+        RIGHT join
+        (   SELECT Name as Professor,
+            row_number() OVER (order by Name ASC) as RowNum
+            FROM OCCUPATIONS
+            WHERE Occupation = 'Professor') as t1
+        on t0.RowNum = t1.RowNum) as b1
+    
+LEFT JOIN
+    (SELECT t2.Singer as Singer, t3.Actor as Actor,
+     row_number() OVER () as RowNum
+     FROM
+            (SELECT Name as Singer,
+            row_number() OVER (order by Name ASC) as RowNum
+            FROM OCCUPATIONS
+            WHERE Occupation = 'Singer') as t2
+     LEFT JOIN
+            (SELECT Name as Actor,
+            row_number() OVER (order by Name ASC) as RowNum
+            FROM OCCUPATIONS
+            WHERE Occupation = 'Actor') as t3
+      on t2.RowNum = t3.RowNum) as b2
+    
+on b1.RowNum = b2.RowNum
+;
+
+
+set @r1=0, @r2=0, @r3=0, @r4=0;
+select min(Doctor), min(Professor), min(Singer), min(Actor)
+from(
+  select case when Occupation='Doctor' then (@r1:=@r1+1)
+            when Occupation='Professor' then (@r2:=@r2+1)
+            when Occupation='Singer' then (@r3:=@r3+1)
+            when Occupation='Actor' then (@r4:=@r4+1) end as RowNumber,
+    case when Occupation='Doctor' then Name end as Doctor,
+    case when Occupation='Professor' then Name end as Professor,
+    case when Occupation='Singer' then Name end as Singer,
+    case when Occupation='Actor' then Name end as Actor
+  from OCCUPATIONS
+  order by Name
+) Temp
+group by RowNumber
+
+
