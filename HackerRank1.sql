@@ -215,5 +215,58 @@ JOIN
  ON COUNTRY.NAME = t0.cname
  GROUP BY COUNTRY.CONTINENT;
 
+SELECT Students.Name, Grades.Grade
+from Students
+join Grades
+on (Students.Marks <= Grades.Max_Mark) and (Students.Marks >= Grades.Min_Mark)
+
+SELECT IF(Grades.Grade>=8,Students.Name,NULL) as sname, Grades.Grade, Students.Marks
+from Students
+join Grades
+on (Students.Marks <= Grades.Max_Mark) and (Students.Marks >= Grades.Min_Mark)
+ORDER BY Grades.Grade DESC, sname, Students.Marks ASC;
+
+
+SELECT DISTINCT Hackers.hacker_id, Hackers.name, t0.scorr
+FROM Hackers
+JOIN (
+    SELECT t1.hacker_id, t1.scorr
+    FROM(
+        SELECT DISTINCT hacker_id, SUM(high_score) AS scorr
+        FROM(
+            SELECT DISTINCT hacker_id, challenge_id, MAX(score) as high_score
+            FROM Submissions
+            GROUP BY hacker_id, challenge_id
+        ) as t2
+        GROUP BY hacker_id
+    )as t1
+    WHERE scorr>0
+) as t0
+ON Hackers.hacker_id = t0.hacker_id
+GROUP BY Hackers.name, Hackers.hacker_id
+ORDER BY t0.scorr DESC, Hackers.hacker_id;
+
+
+
+
+select h.hacker_id, name, sum(score) as total_score
+from
+hackers as h inner join
+/* find max_score*/
+(select hacker_id,  max(score) as score from submissions group by challenge_id, hacker_id) max_score
+
+on h.hacker_id=max_score.hacker_id
+group by h.hacker_id, name
+
+/* don't accept hackers with total_score=0 */
+having total_score > 0
+
+/* finally order as required */
+order by total_score desc, h.hacker_id
+;
+
+
+
+
 
 
