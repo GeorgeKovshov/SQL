@@ -69,6 +69,14 @@ FROM (
     ) AS t1
 );
 
+select concat(Name,'(',Substring(Occupation,1,1),')') as Name
+from occupations
+Order by Name;
+select concat('There are total',' ',count(occupation),' ',lower(occupation),'s.') as total
+from occupations
+group by occupation
+order by total;
+
 SELECT CONCAT(Name,'(', LEFT(Occupation, 1), ')') 
 FROM (
 SELECT Name, Occupation, row_number() OVER (order by Name ASC) as RowNum  FROM OCCUPATIONS
@@ -218,13 +226,18 @@ JOIN
 SELECT Students.Name, Grades.Grade
 from Students
 join Grades
-on (Students.Marks <= Grades.Max_Mark) and (Students.Marks >= Grades.Min_Mark)
+on (Students.Marks <= Grades.Max_Mark) and (Students.Marks >= Grades.Min_Mark);
 
 SELECT IF(Grades.Grade>=8,Students.Name,NULL) as sname, Grades.Grade, Students.Marks
 from Students
 join Grades
 on (Students.Marks <= Grades.Max_Mark) and (Students.Marks >= Grades.Min_Mark)
 ORDER BY Grades.Grade DESC, sname, Students.Marks ASC;
+
+SELECT IF(GRADE < 8, NULL, NAME), GRADE, MARKS
+FROM STUDENTS JOIN GRADES
+WHERE MARKS BETWEEN MIN_MARK AND MAX_MARK
+ORDER BY GRADE DESC, NAME
 
 
 SELECT DISTINCT Hackers.hacker_id, Hackers.name, t0.scorr
@@ -264,6 +277,83 @@ having total_score > 0
 /* finally order as required */
 order by total_score desc, h.hacker_id
 ;
+
+
+SELECT Hackers.name
+from Hackers
+JOIN
+Submissions
+ON Hackers.hacker_id = Submissions.hacker_id
+
+
+SELECT Submissions.hacker_id as hack_id, Submissions.score as hack_score, max_challenge.max_score as max_score
+FROM
+Submissions
+JOIN
+    (SELECT Challenges.challenge_id as chan_id, Difficulty.score as max_score
+    FROM Difficulty
+    JOIN Challenges
+    ON Difficulty.difficulty_level = Challenges.difficulty_level) as max_challenge
+HAVING hack_score = max_score  
+
+
+ SELECT full_list.hacker_id, Hackers.name,
+ FROM
+ Hackers
+ JOIN
+   (SELECT DISTINCT great_hacks.hack_id as hacker_id, COUNT(great_hacks.hack_id) as count_hacks
+    FROM
+        (SELECT Submissions.hacker_id as hack_id, 
+        Submissions.score as hack_score, max_challenge.max_score as max_score
+        FROM
+        Submissions
+        JOIN
+            (SELECT Challenges.challenge_id as chan_id, Difficulty.score as max_score
+            FROM Difficulty
+            JOIN Challenges
+            ON Difficulty.difficulty_level = Challenges.difficulty_level) as max_challenge
+        HAVING hack_score = max_score) as great_hacks
+    GROUP BY hacker_id
+    HAVING count_hacks > 1) as full_list
+ON full_list.hacker_id = Hackers.hacker_id
+ORDER BY full_list.count_hacks DESC, full_list.hacker_id;
+
+ SELECT full_list.hacker_id, Hackers.name
+ FROM
+ Hackers
+ JOIN
+   (SELECT DISTINCT great_hacks.hack_id as hacker_id, COUNT(great_hacks.hack_id) as count_hacks
+    FROM
+        (SELECT Submissions.hacker_id as hack_id, 
+        Submissions.score as hack_score, max_challenge.max_score as max_score
+        FROM
+        Submissions
+        JOIN
+            (SELECT Challenges.challenge_id as chan_id, Difficulty.score as max_score
+            FROM Difficulty
+            JOIN Challenges
+            ON Difficulty.difficulty_level = Challenges.difficulty_level) as max_challenge
+        ON Submissions.challenge_id = max_challenge.chan_id
+        -- GROUP BY hack_id, max_challenge.chan_id, max_score
+        HAVING hack_score = max_score) as great_hacks
+    GROUP BY hacker_id
+    HAVING count_hacks > 1) as full_list
+ON full_list.hacker_id = Hackers.hacker_id
+ORDER BY full_list.count_hacks DESC, full_list.hacker_id;
+
+
+select h.hacker_id, h.name
+from submissions s
+	inner join challenges c
+	on s.challenge_id = c.challenge_id
+		inner join difficulty d
+		on c.difficulty_level = d.difficulty_level 
+			inner join hackers h
+			on s.hacker_id = h.hacker_id
+where s.score = d.score and c.difficulty_level = d.difficulty_level
+group by h.hacker_id, h.name
+having count(s.hacker_id) > 1
+order by count(s.hacker_id) desc, s.hacker_id asc
 
 
 
