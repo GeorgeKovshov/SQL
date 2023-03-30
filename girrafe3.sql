@@ -323,6 +323,17 @@ EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
 
+SELECT CONCAT(first_name, ' ', second_name) as emp_name, client_name
+FROM employee as e
+join
+works_with as w
+ON e.emp_id=w.emp_id
+join client_table as c
+ON w.client_id=c.client_id;
+
+
+
+
 
 
 

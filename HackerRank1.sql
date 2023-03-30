@@ -353,7 +353,135 @@ from submissions s
 where s.score = d.score and c.difficulty_level = d.difficulty_level
 group by h.hacker_id, h.name
 having count(s.hacker_id) > 1
-order by count(s.hacker_id) desc, s.hacker_id asc
+order by count(s.hacker_id) desc, s.hacker_id asc;
+
+
+SELECT id, t0.age, coin, pw
+FROM
+    (SELECT age, MIN(coins_needed) as coin, Wands.power as pw
+    FROM Wands
+    JOIN Wands_Property
+    ON Wands.code = Wands_Property.code
+    WHERE Wands_Property.is_evil = 0
+    GROUP BY age, pw) as t0
+join Wands as w
+on (t0.coin = w.coins_needed) AND (t0.pw = w.power)
+join Wands_property as wp
+on wp.age = t0.age
+ORDER BY pw DESC, t0.age DESC;
+
+SELECT w.id, wp.age, w.coins_needed, w.power
+FROM Wands as w
+join Wands_Property as wp
+on w.code = wp.code
+WHERE is_evil = 0 AND coins_needed = 
+    (SELECT min(coins_needed)
+    FROM Wands as w1
+    JOIN Wands_Property as wp1
+    ON w1.code = wp1.code
+    Where (wp1.age = wp.age) and (w1.power = w.power))
+ORDER BY w.power DESC, wp.age DESC;
+
+
+
+SELECT t0.hack_id, Hackers.name, t0.count_chal
+from (SELECT h.hacker_id AS hack_id, COUNT(c.challenge_id) as count_chal
+    FROM Hackers as h
+    JOIN Challenges as c
+    on h.hacker_id = c.hacker_id
+    GROUP BY hack_id) as t0
+JOIN Hackers
+ON Hackers.hacker_id = t0.hack_id
+WHERE t0.count_chal = 
+    (SELECT max(t1.count_chal1) 
+     from 
+         (SELECT h1.hacker_id AS hack_id1, COUNT(c1.challenge_id) as count_chal1
+        FROM Hackers as h1
+        JOIN Challenges as c1
+        on h1.hacker_id = c1.hacker_id
+        GROUP BY hack_id1) as t1
+    )
+ORDER BY t0.count_chal DESC, t0.hack_id;
+
+-- the one you work on
+
+SET @maxt = (SELECT max(t1.count_chal1) 
+     from 
+         (SELECT h1.hacker_id AS hack_id1, COUNT(c1.challenge_id) as count_chal1
+        FROM Hackers as h1
+        JOIN Challenges as c1
+        on h1.hacker_id = c1.hacker_id
+        GROUP BY hack_id1) as t1
+    );
+    
+(SELECT Hackers.name, t0.count_chal
+from (SELECT h.hacker_id AS hack_id, COUNT(c.challenge_id) as count_chal
+    FROM Hackers as h
+    JOIN Challenges as c
+    on h.hacker_id = c.hacker_id
+    GROUP BY hack_id) as t0
+JOIN Hackers
+ON Hackers.hacker_id = t0.hack_id
+WHERE t0.count_chal = @maxt
+ORDER BY t0.count_chal DESC, t0.hack_id)
+
+UNION
+
+(SELECT MAX(Hackers.name), t1.count_chal1
+from (SELECT h1.hacker_id AS hack_id1, COUNT(c1.challenge_id) as count_chal1
+    FROM Hackers as h1
+    JOIN Challenges as c1
+    on h1.hacker_id = c1.hacker_id
+    GROUP BY hack_id1) as t1
+JOIN Hackers
+ON Hackers.hacker_id = t1.hack_id1
+WHERE t1.count_chal1 < @maxt
+GROUP BY t1.count_chal1
+ORDER BY t1.count_chal1 DESC)
+;
+
+
+
+
+SET @maxt = (SELECT max(t1.count_chal1) 
+     from 
+         (SELECT h1.hacker_id AS hack_id1, COUNT(c1.challenge_id) as count_chal1
+        FROM Hackers as h1
+        JOIN Challenges as c1
+        on h1.hacker_id = c1.hacker_id
+        GROUP BY hack_id1) as t1
+    );
+    
+(SELECT t0.hack_id as col1, Hackers.name as col2, t0.count_chal as col3
+from (SELECT h.hacker_id AS hack_id, COUNT(c.challenge_id) as count_chal
+    FROM Hackers as h
+    JOIN Challenges as c
+    on h.hacker_id = c.hacker_id
+    GROUP BY hack_id) as t0
+JOIN Hackers
+ON Hackers.hacker_id = t0.hack_id
+WHERE t0.count_chal = @maxt)
+
+UNION    
+    
+(SELECT t3.iiid, t3.hack_name, t3.count_chal2 as cc
+FROM
+    (SELECT MIN(t1.hack_id1) as iiid, MAX(Hackers.name) as hack_name, t1.count_chal1 as count_chal2
+    from (SELECT h1.hacker_id AS hack_id1, COUNT(c1.challenge_id) as count_chal1
+        FROM Hackers as h1
+        JOIN Challenges as c1
+        on h1.hacker_id = c1.hacker_id
+        GROUP BY hack_id1) as t1
+    JOIN Hackers
+    ON Hackers.hacker_id = t1.hack_id1
+    WHERE t1.count_chal1 < @maxt
+    GROUP BY t1.count_chal1
+    ORDER BY t1.count_chal1 DESC) AS t3
+JOIN Hackers
+ON t3.hack_name = Hackers.name
+GROUP BY  cc, t3.hack_name)
+ORDER BY col3 DESC, col1 ASC
+;
 
 
 
