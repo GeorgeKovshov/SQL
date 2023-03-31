@@ -484,6 +484,98 @@ ORDER BY col3 DESC, col1 ASC
 ;
 
 
+-- finished one
+
+SET @maxt = (SELECT max(t1.count_chal1) 
+     from 
+         (SELECT h1.hacker_id AS hack_id1, COUNT(c1.challenge_id) as count_chal1
+        FROM Hackers as h1
+        JOIN Challenges as c1
+        on h1.hacker_id = c1.hacker_id
+        GROUP BY hack_id1) as t1
+    );
+
+(SELECT t0.hack_id as col1, Hackers.name as col2, t0.count_chal as col3
+from (SELECT h.hacker_id AS hack_id, COUNT(c.challenge_id) as count_chal
+    FROM Hackers as h
+    JOIN Challenges as c
+    on h.hacker_id = c.hacker_id
+    GROUP BY hack_id) as t0
+JOIN Hackers
+ON Hackers.hacker_id = t0.hack_id
+WHERE t0.count_chal = @maxt)
+
+UNION   
+
+(SELECT t3.hacker_id, Hackers.name, t2.cc
+FROM
+    (SELECT t1.cc
+    FROM
+        (SELECT hacker_id, count(challenge_id) AS cc
+        FROM
+        CHALLENGES
+        GROUP BY hacker_id
+        HAVING cc<@maxt) as t1
+    GROUP BY t1.cc
+    HAVING COUNT(t1.cc) = 1) as t2
+JOIN
+    (
+    SELECT hacker_id, count(challenge_id) AS cc
+    FROM
+    CHALLENGES
+    GROUP BY hacker_id
+    HAVING cc<@maxt) as t3
+on t2.cc = t3.cc
+JOIN
+Hackers
+ON t3.hacker_id = Hackers.hacker_id)
+ORDER BY col3 DESC, col1;
+
+
+
+
+/* these are the columns we want to output */
+select c.hacker_id, h.name ,count(c.hacker_id) as c_count
+
+/* this is the join we want to output them from */
+from Hackers as h
+    inner join Challenges as c on c.hacker_id = h.hacker_id
+
+/* after they have been grouped by hacker */
+group by c.hacker_id
+
+/* but we want to be selective about which hackers we output */
+/* having is required (instead of where) for filtering on groups */
+having 
+
+    /* output anyone with a count that is equal to... */
+    c_count = 
+        /* the max count that anyone has */
+        (SELECT MAX(temp1.cnt)
+        from (SELECT COUNT(hacker_id) as cnt
+             from Challenges
+             group by hacker_id
+             order by hacker_id) temp1)
+
+    /* or anyone who's count is in... */
+    or c_count in 
+        /* the set of counts... */
+        (select t.cnt
+         from (select count(*) as cnt 
+               from challenges
+               group by hacker_id) t
+         /* who's group of counts... */
+         group by t.cnt
+         /* has only one element */
+         having count(t.cnt) = 1)
+
+/* finally, the order the rows should be output */
+order by c_count DESC, c.hacker_id
+
+/* ;) */
+;
+
+
 
 
 
