@@ -30,3 +30,20 @@ group by 1
 order by earnings desc 
 limit 1;
 -- it meants group by first column from SELECT . The same pattern could be used for ORDER BY
+
+SELECT ROUND(LONG_W, 4)
+FROM STATION
+WHERE LAT_N = (SELECT MAX(LAT_N) FROM STATION WHERE LAT_N<137.2345);
+
+ Select round(long_w,4) from Station where lat_n < 137.2345 order by lat_n desc limit 1;
+ 
+SELECT ROUND(ABS(MIN(LAT_N) - MAX(LAT_N)) + ABS(MIN(LONG_W) - MAX(LONG_W)), 4)
+FROM STATION;
+
+
+
+
+
+
+
+
