@@ -46,8 +46,53 @@ select round(LONG_W,4) from STATION where LAT_N>38.7780 order by LAT_N limit 1;
 
 select round(LONG_W,4) from STATION where LAT_N=(select min(LAT_N) from STATION where LAT_N>38.7780);
 
+SELECT DISTINCT Company.company_code, Company.founder, COUNT(lead_manager_code) as lead
+FROM Company
+JOIN Lead_Manager 
+ON Company.company_code = Lead_Manager.company_code
+GROUP BY Company.company_code, Company.founder
+ORDER BY company_code;
 
 
+SELECT DISTINCT Company.company_code, Company.founder, 
+                COUNT(Lead_Manager.lead_manager_code) as lead,
+                count(Senior_Manager.senior_manager_code) as senior
+FROM Company
+JOIN Lead_Manager 
+ON Company.company_code = Lead_Manager.company_code
+JOIN Senior_Manager
+ON Company.company_code = Senior_Manager.company_code
+GROUP BY Company.company_code, Company.founder
+ORDER BY company_code
+
+
+SELECT DISTINCT senior_manager_code, lead_manager_code
+FROM Senior_Manager
+ORDER BY lead_manager_code
+
+
+SELECT t0.company_code, t0.founder, 
+                COUNT(t1.lead_manager_code) as lead,
+                count(t2.senior_manager_code) as senior
+FROM (
+        SELECT DISTINCT Company.company_code, Company.founder
+        FROM Company
+    ) as t0
+JOIN (SELECT COUNT(lead_manager_code) as lead
+     FROM
+        (
+            SELECT DISTINCT lead_manager_code, company_code
+            FROM Lead_manager
+        ) as c1
+     WHERE company_code = t0.company_code) as t1
+ON t0.company_code = t1.company_code
+JOIN (
+     SELECT DISTINCT senior_manager_code, lead_manager_code
+     FROM Senior_manager
+    ) as t2
+ON t1.lead_manager_code = t2.lead_manager_code
+GROUP BY t0.company_code, t0.founder
+ORDER BY company_code
 
 
 
