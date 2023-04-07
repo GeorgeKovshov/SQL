@@ -94,6 +94,38 @@ ON t1.lead_manager_code = t2.lead_manager_code
 GROUP BY t0.company_code, t0.founder
 ORDER BY company_code
 
+SELECT Company.company_code, Company.founder,
+        COUNT(DISTINCT Lead_manager.lead_manager_code),
+        COUNT(DISTINCT Senior_manager.senior_manager_code),
+        COUNT(DISTINCT Manager.manager_code),
+        COUNT(DISTINCT Employee.employee_code)
+FROM Company, Manager, Employee, Senior_Manager, Lead_Manager
+WHERE
+    Company.company_code = Lead_Manager.company_code
+    AND Lead_Manager.lead_manager_code = Senior_Manager.lead_manager_code
+    AND Senior_Manager.senior_manager_code = Manager.senior_manager_code
+    AND Manager.manager_code = Employee.manager_code
+GROUP BY Company.company_code, Company.founder
+ORDER BY Company.company_code;
+
+
+SELECT Company.company_code, Company.founder,
+        COUNT(DISTINCT Lead_manager.lead_manager_code),
+        COUNT(DISTINCT Senior_manager.senior_manager_code),
+        COUNT(DISTINCT Manager.manager_code),
+        COUNT(DISTINCT Employee.employee_code)
+FROM Company
+JOIN Lead_Manager
+ON Company.company_code = Lead_Manager.company_code
+JOIN Senior_Manager
+ON Lead_Manager.lead_manager_code = Senior_Manager.lead_manager_code
+JOIN Manager
+ON Senior_Manager.senior_manager_code = Manager.senior_manager_code
+JOIN Employee
+ON Manager.manager_code = Employee.manager_code
+
+GROUP BY Company.company_code, Company.founder
+ORDER BY Company.company_code
 
 
 
