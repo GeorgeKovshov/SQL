@@ -125,8 +125,13 @@ JOIN Employee
 ON Manager.manager_code = Employee.manager_code
 
 GROUP BY Company.company_code, Company.founder
-ORDER BY Company.company_code
+ORDER BY Company.company_code;
 
+
+SELECT ROUND(SQRT(POWER(t0.a - t0.b, 2) + POWER(t0.c - t0.d, 2)), 4)
+FROM
+    (SELECT MIN(LAT_N) AS a, MAX(LAT_N) AS b, MIN(LONG_W) AS c, MAX(LONG_W) AS d
+    FROM STATION) AS t0
 
 
 

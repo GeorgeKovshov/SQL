@@ -332,6 +332,80 @@ join client_table as c
 ON w.client_id=c.client_id;
 
 
+SELECT DISTINCT column, AGG_FUNC(column_or_expression), …
+FROM mytable
+    JOIN another_table
+      ON mytable.column = another_table.column
+    WHERE constraint_expression
+    GROUP BY column
+    HAVING constraint_expression
+    ORDER BY column ASC/DESC
+    LIMIT count OFFSET COUNT;
+ 
+ 
+ 
+ 
+ 
+CREATE TABLE Projects (
+	Task_iD INT PRIMARY KEY,
+    Start_date date,
+    End_date date
+);
+INSERT INTO Projects VALUES(1, "2015-10-01", "2015-10-02");
+INSERT INTO Projects VALUES(2, "2015-10-02", "2015-10-03");
+INSERT INTO Projects VALUES(3, "2015-10-03", "2015-10-04");
+INSERT INTO Projects VALUES(4, "2015-10-13", "2015-10-14");
+INSERT INTO Projects VALUES(5, "2015-10-14", "2015-10-15");
+INSERT INTO Projects VALUES(6, "2015-10-28", "2015-10-29");
+INSERT INTO Projects VALUES(7, "2015-10-30", "2015-10-31");
+
+Select t1.Start_date, t0.End_date 
+from (	Select Start_date, row_number() OVER () as Task_ID
+		from Projects 
+		where Projects.Start_date NOT IN (
+		SELECT End_date from Projects)) as t1
+LEFT JOIN (	Select End_date, row_number() OVER () as Task_ID
+		from Projects 
+		where End_date NOT IN (
+		SELECT Start_date from Projects)) as t0
+ON t1.Task_ID = t0.Task_ID
+ORDER BY t0.End_date - t1.Start_date
+;
+
+SELECT Start_Date, End_Date
+FROM 
+    (SELECT Start_Date FROM Projects WHERE Start_Date NOT IN (SELECT End_Date FROM Projects)) a,
+    (SELECT End_Date FROM Projects WHERE End_Date NOT IN (SELECT Start_Date FROM Projects)) b 
+WHERE Start_Date < End_Date
+GROUP BY Start_Date 
+ORDER BY DATEDIFF(End_Date, Start_Date), Start_Date;
+
+SELECT Start_Date, MIN(End_Date)
+FROM 
+/* Choose start dates that are not end dates of other projects (if a start date is an end date, it is part of the samee project) */
+    (SELECT Start_Date FROM Projects WHERE Start_Date NOT IN (SELECT End_Date FROM Projects)) a,
+/* Choose end dates that are not end dates of other projects */
+    (SELECT end_date FROM PROJECTS WHERE end_date NOT IN (SELECT start_date FROM PROJECTS)) b
+/* At this point, we should have a list of start dates and end dates that don't necessarily correspond with each other */
+/* This makes sure we only choose end dates that fall after the start date, and choosing the MIN means for the particular start_date, we get the closest end date that does not coincide with the start of another task */
+where start_date < end_date
+GROUP BY start_date
+ORDER BY datediff(start_date, MIN(end_date)) DESC, start_date;
+
+CREATE PROCEDURE proc()
+BEGIN
+	DECLARE Counter int;
+    SET Counter = 10;
+    WHILE Counter > 0
+	BEGIN
+		SELECT(Counter);
+		SET Counter = Counter - 1;
+    END WHILE;
+END$$
+
+
+
+
 
 
 
