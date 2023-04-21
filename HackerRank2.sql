@@ -131,7 +131,46 @@ ORDER BY Company.company_code;
 SELECT ROUND(SQRT(POWER(t0.a - t0.b, 2) + POWER(t0.c - t0.d, 2)), 4)
 FROM
     (SELECT MIN(LAT_N) AS a, MAX(LAT_N) AS b, MIN(LONG_W) AS c, MAX(LONG_W) AS d
-    FROM STATION) AS t0
+    FROM STATION) AS t0;
+    
+    
+    
+    
+
+SELECT FriendSalary.Name 
+FROM
+    (SELECT s1.ID as ID, Name, Salary
+    FROM Students s1
+    JOIN Friends f1
+    ON s1.ID = f1.ID
+    JOIN Packages p1
+    ON f1.Friend_ID = p1.ID) as FriendSalary
+JOIN
+    (SELECT s.ID as ID, Name, Salary
+    FROM Students s
+    JOIN Packages p
+    ON s.ID = p.ID) as PersonSalary
+ON FriendSalary.ID = PersonSalary.ID
+WHERE FriendSalary.Salary>PersonSalary.Salary
+ORDER BY FriendSalary.Salary
+
+SELECT s.name
+FROM students s
+JOIN friends f
+ON s.id = f.id
+JOIN packages p
+ON f.id = p.id
+JOIN packages p2
+ON f.friend_id = p2.id
+WHERE p.salary < p2.salary
+ORDER BY p2.salary;
+
+
+
+
+
+
+
 
 
 
