@@ -89,7 +89,7 @@ FROM OCCUPATIONS GROUP BY Occupation
 ) as Y;
 
 
-
+SELECT Name, Occupation, row_number() OVER (order by Name ASC) as RowNum  FROM OCCUPATIONS;
 
 
 SELECT b1.Doctor, b1.Professor, b2.Singer, b2.Actor

@@ -24,6 +24,8 @@ CREATE TABLE student (
 
 DESCRIBE student;
 
+DESCRIBE giraffe_database;
+
 DROP TABLE student;
 
 ALTER TABLE student ADD gpa DECIMAL(3,2);
@@ -78,6 +80,8 @@ FROM student;
 SELECT stud_name, major 
 FROM student
 ORDER BY stud_name;
+
+SELECT CURRENT_USER();
 
 SELECT stud_name, major 
 FROM student
